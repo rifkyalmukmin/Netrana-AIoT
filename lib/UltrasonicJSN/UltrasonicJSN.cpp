@@ -1,26 +1,28 @@
 #include "UltrasonicJSN.h"
+#include "config.h"
 
-UltrasonicJSN::UltrasonicJSN(int trigPin, int echoPin){
-    _trigPin = trigPin;
-    _echoPin = echoPin;
-    pinMode(_trigPin, OUTPUT);
-    pinMode(_echoPin, INPUT);
+UltrasonicJSN::UltrasonicJSN(uint8_t trig, uint8_t echo) : trig_(trig), echo_(echo) {}
+void UltrasonicJSN::begin() {
+        pinMode(trig_, OUTPUT);
+        pinMode(echo_, INPUT);
+        digitalWrite(trig_, LOW);
 }
 
-float UltrasonicJSN::getDistanceCM() {
-    digitalWrite(_trigPin, LOW);
+float UltrasonicJSN::readDistanceCM(uint32_t timeout_us){
+    //Trigger 10us
+    digitalWrite(trig_, LOW);
     delayMicroseconds(2);
-    digitalWrite(_trigPin, HIGH);
+    digitalWrite(trig_, HIGH);
     delayMicroseconds(10);
-    digitalWrite(_trigPin, LOW);
+    digitalWrite(trig_, LOW);
 
-    long duration = pulseIn(_echoPin, HIGH);
-    if (duration == 0) return -1; // No echo received
+    //Baca pulse echo
+    unsigned long duration = pulseIn(echo_, HIGH, timeout_us);
+    if (duration == 0) return NAN; //timeout
+
+   // Kecepatan suara ~343 m/s → 29.1 us per cm (PPM).
+    float cm = (duration / 58.2f); // rumus umum HC-SR04/JSN-SR04
+    if (cm < MIN_RANGE_CM || cm > MAX_RANGE_CM) return NAN;
+    return cm;
     
-    float distance = duration * 0.034 / 2; // Convert to cm
-    return distance;
-}
-bool UltrasonicJSN::isObstacle(float thresholdCM) {
-    float distance = getDistanceCM();
-    return (distance > 0 && distance < thresholdCM);
 }
