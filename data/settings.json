@@ -1,7 +1,0 @@
-{
-"lower_alert_cm": 60,
-"upper_alert_cm": 120,
-"sensor_min_cm": 20,
-"sensor_max_cm": 600,
-"notes": "Belum dipakai oleh firmware. Disiapkan untuk konfigurasi runtime di masa depan."
-}
